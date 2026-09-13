@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Minicraft.Engine</AssemblyName>
+    <RootNamespace>Minicraft.Engine</RootNamespace>
+  </PropertyGroup>
+
+</Project>

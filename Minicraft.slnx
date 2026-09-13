@@ -1,2 +1,9 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Engine/Engine.csproj" />
+    <Project Path="src/Rendering/Rendering.csproj" />
+  </Folder>
+  <Folder Name="/src/Applications/">
+    <Project Path="src/Applications/Client/Client.csproj" />
+  </Folder>
 </Solution>
