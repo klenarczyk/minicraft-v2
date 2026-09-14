@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using Minicraft.Engine.Gameplay;
-using Minicraft.Rendering.Geometry;
+using Minicraft.Engine.Geometry;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
@@ -10,7 +10,8 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
 {
     private OpenGlShader? _blockShader;
     private OpenGlTexture? _dirtTexture;
-    private OpenGlMesh? _cubeMesh;
+
+    private OpenGlMesh? _worldMesh;
     
     public void Initialize()
     {
@@ -18,8 +19,6 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
 
         _dirtTexture = new OpenGlTexture(gl,
             Path.Combine(AppContext.BaseDirectory, "assets", "textures", "blocks", "dirt.png"));
-
-        _cubeMesh = new OpenGlMesh(gl, CubeMeshData.Vertices, CubeMeshData.Indices);
         
         gl.Enable(EnableCap.DepthTest);
         
@@ -28,9 +27,11 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
         gl.FrontFace(FrontFaceDirection.Ccw);
     }
 
-    public void Render(Camera camera, double deltaTime)
+    public void Render(Camera camera, MeshData worldMesh, double deltaTime)
     {
-        if (_blockShader is null || _dirtTexture is null || _cubeMesh is null)
+        _worldMesh ??= new OpenGlMesh(gl, worldMesh.Vertices, worldMesh.Indices);
+        
+        if (_blockShader is null || _dirtTexture is null)
             throw new InvalidOperationException("Renderer has not been initialized.");
         
         gl.ClearColor(0.529f, 0.808f, 0.922f, 1.0f);
@@ -40,14 +41,14 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
         
         _dirtTexture.Bind();
         
-        var model = Matrix4x4.CreateTranslation(3, 0, 0);
+        var model = Matrix4x4.CreateTranslation(0, 0, 0);
 
         _blockShader.SetInt("uTexture", 0);
         _blockShader.SetMatrix4("uModel", model);
         _blockShader.SetMatrix4("uView", camera.CreateViewMatrix());
         _blockShader.SetMatrix4("uProjection", camera.CreateProjectionMatrix());
-
-        _cubeMesh.Draw();
+        
+        _worldMesh.Draw();
     }
     
     public void Resize(int width, int height)

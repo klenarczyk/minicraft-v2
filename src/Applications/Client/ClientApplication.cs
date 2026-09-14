@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Minicraft.Engine;
 using Minicraft.Engine.Input;
+using Minicraft.Engine.World.Meshing;
 using Minicraft.Rendering;
 using Minicraft.Rendering.OpenGL;
 using Silk.NET.Input;
@@ -16,7 +17,7 @@ public sealed class ClientApplication
     private readonly IWindow _window;
     
     private readonly GameEngine _engine = new();
-    private IRenderer? _renderer;
+    private OpenGlRenderer? _renderer;
     
     private IKeyboard? _keyboard;
     private IMouse? _mouse;
@@ -60,10 +61,11 @@ public sealed class ClientApplication
         
         _renderer = new OpenGlRenderer(gl);
         _renderer.Initialize();
-        _renderer.Resize(size.X, size.Y);
         
         _engine.Initialize();
+        
         _engine.Player.Camera.Resize(size.X, size.Y);
+        _renderer.Resize(size.X, size.Y);
         
         ConfigureDefaultBindings();
     }
@@ -72,13 +74,13 @@ public sealed class ClientApplication
     {
         _engine.Update(deltaTime);
     }
-
+    
     private void Render(double deltaTime)
     {
         if (_renderer is null) 
             throw new InvalidOperationException("Renderer has not been initialized.");
         
-        _renderer.Render(_engine.Player.Camera, deltaTime);
+        _renderer.Render(_engine.Player.Camera, _engine.GetWorldMesh(), deltaTime);
     }
     
     private void Close()

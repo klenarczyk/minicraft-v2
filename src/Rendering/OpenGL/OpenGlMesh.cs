@@ -1,4 +1,6 @@
-﻿using Silk.NET.OpenGL;
+﻿using Minicraft.Engine.Geometry;
+using Minicraft.Engine.World.Meshing;
+using Silk.NET.OpenGL;
 
 namespace Minicraft.Rendering.OpenGL;
 
@@ -12,7 +14,7 @@ public sealed class OpenGlMesh : IDisposable
 
     private readonly uint _indexCount;
 
-    public unsafe OpenGlMesh(GL gl, float[] vertices, uint[] indices)
+    public unsafe OpenGlMesh(GL gl, MeshVertex[] vertices, uint[] indices)
     {
         _gl = gl;
 
@@ -25,23 +27,19 @@ public sealed class OpenGlMesh : IDisposable
         gl.BindVertexArray(_vao);
 
         // Vertex buf
-        gl.BindBuffer(
-            BufferTargetARB.ArrayBuffer,
-            _vbo);
+        gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
 
-        fixed (float* buffer = vertices)
+        fixed (MeshVertex* buffer = vertices)
         {
             gl.BufferData(
                 BufferTargetARB.ArrayBuffer,
-                (nuint)(vertices.Length * sizeof(float)),
+                (nuint)(vertices.Length * sizeof(MeshVertex)),
                 buffer,
                 BufferUsageARB.StaticDraw);
         }
 
         // Index buf
-        gl.BindBuffer(
-            BufferTargetARB.ElementArrayBuffer,
-            _ebo);
+        gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
 
         fixed (uint* buffer = indices)
         {
@@ -62,7 +60,7 @@ public sealed class OpenGlMesh : IDisposable
             3,
             VertexAttribPointerType.Float,
             false,
-            5 * sizeof(float),
+            (uint)sizeof(MeshVertex),
             (void*)0);
 
         // Texture coords
@@ -75,7 +73,7 @@ public sealed class OpenGlMesh : IDisposable
             2,
             VertexAttribPointerType.Float,
             false,
-            5 * sizeof(float),
+            (uint)sizeof(MeshVertex),
             (void*)(3 * sizeof(float)));
         
         // ---

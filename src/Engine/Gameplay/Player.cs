@@ -10,7 +10,7 @@ public sealed class Player
     public void Update(double deltaTime, InputState input)
     {
         const float mouseSensitivity = 0.002f;
-        const float speed = 5f;
+        const float speed = 20f;
         
         Camera.Rotate(
             input.MouseDelta.X * mouseSensitivity, 
