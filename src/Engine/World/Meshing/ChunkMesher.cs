@@ -6,7 +6,7 @@ namespace Minicraft.Engine.World.Meshing;
 
 public sealed class ChunkMesher(BlockRegistry blocks)
 {
-    public MeshData Build(Chunk chunk)
+    public MeshData Build(World world, Chunk chunk)
     {
         var vertices = new List<MeshVertex>();
         var indices = new List<uint>();
@@ -20,38 +20,34 @@ public sealed class ChunkMesher(BlockRegistry blocks)
 
             if (!block.IsSolid) continue;
 
-            if (IsAirOrOutside(chunk, x - 1, y, z))
+            int worldX = chunk.Position.X * Chunk.SizeX + x;
+            int worldZ = chunk.Position.Z * Chunk.SizeZ + z;
+            
+            if (IsAir(world, worldX - 1, y, worldZ))
                 AddFace(vertices, indices, x, y, z, Direction.West);
 
-            if (IsAirOrOutside(chunk, x + 1, y, z))
+            if (IsAir(world, worldX + 1, y, worldZ))
                 AddFace(vertices, indices, x, y, z, Direction.East);
 
-            if (IsAirOrOutside(chunk, x, y - 1, z))
+            if (IsAir(world, worldX, y - 1, worldZ))
                 AddFace(vertices, indices, x, y, z, Direction.Down);
 
-            if (IsAirOrOutside(chunk, x, y + 1, z))
+            if (IsAir(world, worldX, y + 1, worldZ))
                 AddFace(vertices, indices, x, y, z, Direction.Up);
 
-            if (IsAirOrOutside(chunk, x, y, z - 1))
+            if (IsAir(world, worldX, y, worldZ - 1))
                 AddFace(vertices, indices, x, y, z, Direction.North);
 
-            if (IsAirOrOutside(chunk, x, y, z + 1))
+            if (IsAir(world, worldX, y, worldZ + 1))
                 AddFace(vertices, indices, x, y, z, Direction.South);
         }
 
         return new MeshData(vertices.ToArray(), indices.ToArray());
     }
 
-    private bool IsAirOrOutside(Chunk chunk, int x, int y, int z)
+    private bool IsAir(World world, int x, int y, int z)
     {
-        if (x < 0 || x >= Chunk.SizeX ||
-            y < 0 || y >= Chunk.SizeY ||
-            z < 0 || z >= Chunk.SizeZ)
-        {
-            return true;
-        }
-
-        return !blocks.Get(chunk.GetBlock(x, y, z)).IsSolid;
+        return !blocks.Get(world.GetBlock(x, y, z)).IsSolid;
     }
 
     private static void AddFace(

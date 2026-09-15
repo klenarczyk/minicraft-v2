@@ -5,5 +5,6 @@ namespace Minicraft.Rendering.Abstractions;
 
 public readonly record struct ChunkRenderData(
     ChunkPosition Position,
-    MeshData Mesh
+    MeshData Mesh,
+    int MeshVersion
 );

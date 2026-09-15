@@ -6,17 +6,16 @@ namespace Minicraft.Engine.World.Chunks;
 
 public sealed class ChunkStreamer(ChunkStorage chunks)
 {
-    public int RenderDistance { get; set; } = 4;
+    public int LoadDistance { get; set; } = 5;
     
     public void Update(Vector3 playerPosition)
     {
         var playerChunk = WorldToChunkPosition(playerPosition);
         
-        // TODO: Add chunk unloading
-        // UnloadFarChunks(playerChunk);
+        UnloadFarChunks(playerChunk);
         
-        for (int x = -RenderDistance; x <= RenderDistance; x++)
-        for (int z = -RenderDistance; z <= RenderDistance; z++)
+        for (int x = -LoadDistance; x <= LoadDistance; x++)
+        for (int z = -LoadDistance; z <= LoadDistance; z++)
         {
             var position = new ChunkPosition(playerChunk.X + x, playerChunk.Z + z);
             
@@ -32,14 +31,37 @@ public sealed class ChunkStreamer(ChunkStorage chunks)
     {
         var chunk = new Chunk(position);
         
-        FlatWorldGenerator.Generate(chunk, new BlockId(1));
+        RippleWorldGenerator.Generate(chunk, new BlockId(1));
         
         chunks.Add(chunk);
+        
+        chunk.MarkMeshDirty();
+
+        foreach (var offset in Neighbors)
+        {
+            var neighPos = new ChunkPosition(
+                chunk.Position.X + offset.X,
+                chunk.Position.Z + offset.Z
+            );
+            
+            if (chunks.TryGet(neighPos, out var neigh))
+                neigh!.MarkMeshDirty();
+        }
     }
 
     private void UnloadFarChunks(ChunkPosition center)
     {
-        throw new NotImplementedException();
+        foreach (var chunk in chunks.LoadedChunks.ToArray())
+        {
+            var pos = chunk.Position;
+
+            if (Math.Abs(pos.X - center.X) > LoadDistance ||
+                Math.Abs(pos.Z - center.Z) > LoadDistance)
+            {
+                // Chunk saving will be added later on
+                chunks.Remove(pos, out _);
+            }
+        }
     }
 
     private static ChunkPosition WorldToChunkPosition(Vector3 position)
@@ -49,4 +71,12 @@ public sealed class ChunkStreamer(ChunkStorage chunks)
 
         return new ChunkPosition(chunkX, chunkZ);
     }
+
+    private static readonly ChunkPosition[] Neighbors =
+    [
+        new (-1, 0),
+        new(1, 0),
+        new(0, -1),
+        new(0, 1)
+    ];
 }

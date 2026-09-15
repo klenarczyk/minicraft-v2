@@ -12,7 +12,10 @@ public sealed class Chunk(ChunkPosition position)
     private readonly BlockId[] _blocks = new BlockId[SizeX * SizeY * SizeZ];
     
     public ChunkPosition Position { get; } = position;
+    
     public MeshData? Mesh { get; private set; }
+    public int MeshVersion { get; private set; }
+    public bool IsMeshDirty { get; private set; }
     
     public BlockId GetBlock(int x, int y, int z)
     {
@@ -27,6 +30,13 @@ public sealed class Chunk(ChunkPosition position)
     public void SetMesh(MeshData mesh)
     {
         Mesh = mesh;
+        MeshVersion++;
+        IsMeshDirty = false;
+    }
+
+    public void MarkMeshDirty()
+    {
+        IsMeshDirty = true;
     }
     
     private static int GetIndex(int x, int y, int z)

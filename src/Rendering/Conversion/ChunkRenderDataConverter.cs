@@ -11,7 +11,7 @@ public static class ChunkRenderDataConverter
         {
             if (chunk.Mesh is null) continue;
             
-            yield return new ChunkRenderData(chunk.Position, chunk.Mesh);
+            yield return new ChunkRenderData(chunk.Position, chunk.Mesh, chunk.MeshVersion);
         }
     }
 }
