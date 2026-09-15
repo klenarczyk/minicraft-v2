@@ -42,6 +42,8 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
         _dirtTexture.Bind();
 
         _blockShader.SetInt("uTexture", 0);
+        _blockShader.SetVector3("uLightDirection", new Vector3(0.5f, 1.0f, 0.3f)); // TODO: Turn into an actual sun
+        
         _blockShader.SetMatrix4("uView", camera.CreateViewMatrix());
         _blockShader.SetMatrix4("uProjection", camera.CreateProjectionMatrix());
         

@@ -63,8 +63,21 @@ public sealed class OpenGlMesh : IDisposable
             (uint)sizeof(MeshVertex),
             (void*)0);
 
+        // Normals
+        const uint normalLocation = 1;
+        
+        gl.EnableVertexAttribArray(normalLocation);
+        
+        gl.VertexAttribPointer(
+            normalLocation,
+            3,
+            VertexAttribPointerType.Float,
+            false,
+            (uint)sizeof(MeshVertex),
+            (void*)(3 * sizeof(float)));
+        
         // Texture coords
-        const uint texCoordLocation = 1;
+        const uint texCoordLocation = 2;
 
         gl.EnableVertexAttribArray(texCoordLocation);
 
@@ -74,7 +87,7 @@ public sealed class OpenGlMesh : IDisposable
             VertexAttribPointerType.Float,
             false,
             (uint)sizeof(MeshVertex),
-            (void*)(3 * sizeof(float)));
+            (void*)(6 * sizeof(float)));
         
         // ---
         

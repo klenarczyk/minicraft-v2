@@ -55,6 +55,12 @@ public sealed class OpenGlShader : IDisposable
         _gl.Uniform1(location, value);
     }
 
+    public void SetVector3(string name, Vector3 value)
+    {
+        int location = GetUniformLocation(name);
+        _gl.Uniform3(location, value.X, value.Y, value.Z);
+    }
+    
     public unsafe void SetMatrix4(string name, Matrix4x4 matrix)
     {
         int location = GetUniformLocation(name);

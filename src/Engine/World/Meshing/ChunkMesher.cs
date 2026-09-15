@@ -61,45 +61,45 @@ public sealed class ChunkMesher(BlockRegistry blocks)
         switch (direction)
         {
             case Direction.West:
-                AddVertex(vertices, x, y, z, 0, 0);
-                AddVertex(vertices, x, y, z + 1, 1, 0);
-                AddVertex(vertices, x, y + 1, z + 1, 1, 1);
-                AddVertex(vertices, x, y + 1, z, 0, 1);
+                AddVertex(vertices, x, y, z, -1, 0, 0, 0, 0);
+                AddVertex(vertices, x, y, z + 1, -1, 0, 0, 1, 0);
+                AddVertex(vertices, x, y + 1, z + 1, -1, 0, 0, 1, 1);
+                AddVertex(vertices, x, y + 1, z, -1, 0, 0, 0, 1);
                 break;
 
             case Direction.East:
-                AddVertex(vertices, x + 1, y, z, 0, 0);
-                AddVertex(vertices, x + 1, y + 1, z, 0, 1);
-                AddVertex(vertices, x + 1, y + 1, z + 1, 1, 1);
-                AddVertex(vertices, x + 1, y, z + 1, 1, 0);
+                AddVertex(vertices, x + 1, y, z, 1, 0, 0, 0, 0);
+                AddVertex(vertices, x + 1, y + 1, z, 1, 0, 0, 0, 1);
+                AddVertex(vertices, x + 1, y + 1, z + 1, 1, 0, 0, 1, 1);
+                AddVertex(vertices, x + 1, y, z + 1, 1, 0, 0, 1, 0);
                 break;
 
             case Direction.Down:
-                AddVertex(vertices, x, y, z, 0, 0);
-                AddVertex(vertices, x + 1, y, z, 1, 0);
-                AddVertex(vertices, x + 1, y, z + 1, 1, 1);
-                AddVertex(vertices, x, y, z + 1, 0, 1);
+                AddVertex(vertices, x, y, z, 0, -1, 0, 0, 0);
+                AddVertex(vertices, x + 1, y, z, 0, -1, 0, 1, 0);
+                AddVertex(vertices, x + 1, y, z + 1, 0, -1, 0, 1, 1);
+                AddVertex(vertices, x, y, z + 1, 0, -1, 0, 0, 1);
                 break;
 
             case Direction.Up:
-                AddVertex(vertices, x, y + 1, z, 0, 0);
-                AddVertex(vertices, x, y + 1, z + 1, 0, 1);
-                AddVertex(vertices, x + 1, y + 1, z + 1, 1, 1);
-                AddVertex(vertices, x + 1, y + 1, z, 1, 0);
+                AddVertex(vertices, x, y + 1, z, 0, 1, 0, 0, 0);
+                AddVertex(vertices, x, y + 1, z + 1, 0, 1, 0, 0, 1);
+                AddVertex(vertices, x + 1, y + 1, z + 1, 0, 1, 0, 1, 1);
+                AddVertex(vertices, x + 1, y + 1, z, 0, 1, 0, 1, 0);
                 break;
 
             case Direction.North:
-                AddVertex(vertices, x, y, z, 0, 0);
-                AddVertex(vertices, x, y + 1, z, 0, 1);
-                AddVertex(vertices, x + 1, y + 1, z, 1, 1);
-                AddVertex(vertices, x + 1, y, z, 1, 0);
+                AddVertex(vertices, x, y, z, 0, 0, -1, 0, 0);
+                AddVertex(vertices, x, y + 1, z, 0, 0, -1, 0, 1);
+                AddVertex(vertices, x + 1, y + 1, z, 0, 0, -1, 1, 1);
+                AddVertex(vertices, x + 1, y, z, 0, 0, -1, 1, 0);
                 break;
 
             case Direction.South:
-                AddVertex(vertices, x + 1, y, z + 1, 0, 0);
-                AddVertex(vertices, x + 1, y + 1, z + 1, 0, 1);
-                AddVertex(vertices, x, y + 1, z + 1, 1, 1);
-                AddVertex(vertices, x, y, z + 1, 1, 0);
+                AddVertex(vertices, x + 1, y, z + 1, 0, 0, 1, 0, 0);
+                AddVertex(vertices, x + 1, y + 1, z + 1, 0, 0, 1, 0, 1);
+                AddVertex(vertices, x, y + 1, z + 1, 0, 0, 1, 1, 1);
+                AddVertex(vertices, x, y, z + 1, 0, 0, 1, 1, 0);
                 break;
         }
 
@@ -115,8 +115,9 @@ public sealed class ChunkMesher(BlockRegistry blocks)
     private static void AddVertex(
         List<MeshVertex> vertices,
         float x, float y, float z,
+        float nx, float ny, float nz,
         float u, float v)
     {
-        vertices.Add(new MeshVertex(x, y, z, u, v));
+        vertices.Add(new MeshVertex(x, y, z, nx, ny, nz, u, v));
     }
 }
