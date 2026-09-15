@@ -1,4 +1,4 @@
-﻿namespace Minicraft.Engine.World;
+﻿namespace Minicraft.Engine.World.Blocks;
 
 public readonly record struct BlockId(ushort Value)
 {

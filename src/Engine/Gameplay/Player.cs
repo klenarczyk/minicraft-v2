@@ -5,7 +5,7 @@ namespace Minicraft.Engine.Gameplay;
 
 public sealed class Player
 {
-    public Camera Camera { get; } = new(Vector3.Zero);
+    public Camera Camera { get; } = new(new Vector3(0, 24, 0));
 
     public void Update(double deltaTime, InputState input)
     {

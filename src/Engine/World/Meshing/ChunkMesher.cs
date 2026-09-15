@@ -1,4 +1,6 @@
 ﻿using Minicraft.Engine.Geometry;
+using Minicraft.Engine.World.Blocks;
+using Minicraft.Engine.World.Chunks;
 
 namespace Minicraft.Engine.World.Meshing;
 

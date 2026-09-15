@@ -1,4 +1,7 @@
-﻿namespace Minicraft.Engine.World.Generation;
+﻿using Minicraft.Engine.World.Blocks;
+using Minicraft.Engine.World.Chunks;
+
+namespace Minicraft.Engine.World.Generation;
 
 public static class FlatWorldGenerator
 {

@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Minicraft.Engine.Gameplay;
-using Minicraft.Engine.Geometry;
+using Minicraft.Engine.World.Chunks;
+using Minicraft.Rendering.Abstractions;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
@@ -10,8 +11,8 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
 {
     private OpenGlShader? _blockShader;
     private OpenGlTexture? _dirtTexture;
-
-    private OpenGlMesh? _worldMesh;
+    
+    private readonly Dictionary<ChunkPosition, OpenGlMesh> _chunkMeshes = new();
     
     public void Initialize()
     {
@@ -27,10 +28,8 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
         gl.FrontFace(FrontFaceDirection.Ccw);
     }
 
-    public void Render(Camera camera, MeshData worldMesh, double deltaTime)
+    public void Render(Camera camera, IEnumerable<ChunkRenderData> chunks, double deltaTime)
     {
-        _worldMesh ??= new OpenGlMesh(gl, worldMesh.Vertices, worldMesh.Indices);
-        
         if (_blockShader is null || _dirtTexture is null)
             throw new InvalidOperationException("Renderer has not been initialized.");
         
@@ -38,17 +37,26 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
         gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         
         _blockShader.Use();
-        
         _dirtTexture.Bind();
-        
-        var model = Matrix4x4.CreateTranslation(0, 0, 0);
 
         _blockShader.SetInt("uTexture", 0);
-        _blockShader.SetMatrix4("uModel", model);
         _blockShader.SetMatrix4("uView", camera.CreateViewMatrix());
         _blockShader.SetMatrix4("uProjection", camera.CreateProjectionMatrix());
         
-        _worldMesh.Draw();
+        foreach (var chunk in chunks)
+        {
+            var mesh = GetOrCreateMesh(chunk);
+
+            var position = new Vector3(
+                chunk.Position.X * Chunk.SizeX,
+                0,
+                chunk.Position.Z * Chunk.SizeZ);
+
+            var model = Matrix4x4.CreateTranslation(position);
+            _blockShader.SetMatrix4("uModel", model);
+
+            mesh.Draw();
+        }
     }
     
     public void Resize(int width, int height)
@@ -73,5 +81,18 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
         string fragmentSource = File.ReadAllText(Path.Combine(shaderDirectory, "block.frag"));
         
         return new OpenGlShader(gl, vertexSource, fragmentSource);
+    }
+
+    private OpenGlMesh GetOrCreateMesh(ChunkRenderData chunk)
+    {
+        if (_chunkMeshes.TryGetValue(chunk.Position, out var mesh))
+        {
+            return mesh;
+        }
+
+        mesh = new OpenGlMesh(gl, chunk.Mesh!.Vertices, chunk.Mesh.Indices);
+        _chunkMeshes.Add(chunk.Position, mesh);
+
+        return mesh;
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Minicraft.Engine.World;
+﻿namespace Minicraft.Engine.World.Blocks;
 
 public sealed class BlockDefinition(BlockId id, string name, bool isSolid = true)
 {

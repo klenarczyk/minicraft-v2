@@ -1,8 +1,7 @@
 ﻿using System.Numerics;
 using Minicraft.Engine;
 using Minicraft.Engine.Input;
-using Minicraft.Engine.World.Meshing;
-using Minicraft.Rendering;
+using Minicraft.Rendering.Conversion;
 using Minicraft.Rendering.OpenGL;
 using Silk.NET.Input;
 using Silk.NET.Input.Sdl;
@@ -80,7 +79,11 @@ public sealed class ClientApplication
         if (_renderer is null) 
             throw new InvalidOperationException("Renderer has not been initialized.");
         
-        _renderer.Render(_engine.Player.Camera, _engine.GetWorldMesh(), deltaTime);
+        _renderer.Render(
+            _engine.Player.Camera, 
+            ChunkRenderDataConverter.Convert(_engine.World.Chunks.LoadedChunks), 
+            deltaTime
+        );
     }
     
     private void Close()

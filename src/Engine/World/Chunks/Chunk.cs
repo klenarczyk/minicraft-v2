@@ -1,13 +1,19 @@
-﻿namespace Minicraft.Engine.World;
+﻿using Minicraft.Engine.Geometry;
+using Minicraft.Engine.World.Blocks;
 
-public sealed class Chunk
+namespace Minicraft.Engine.World.Chunks;
+
+public sealed class Chunk(ChunkPosition position)
 {
     public const int SizeX = 16;
     public const int SizeY = 256;
     public const int SizeZ = 16;
     
     private readonly BlockId[] _blocks = new BlockId[SizeX * SizeY * SizeZ];
-
+    
+    public ChunkPosition Position { get; } = position;
+    public MeshData? Mesh { get; private set; }
+    
     public BlockId GetBlock(int x, int y, int z)
     {
         return _blocks[GetIndex(x, y, z)];
@@ -18,6 +24,11 @@ public sealed class Chunk
         _blocks[GetIndex(x, y, z)] = block;
     }
 
+    public void SetMesh(MeshData mesh)
+    {
+        Mesh = mesh;
+    }
+    
     private static int GetIndex(int x, int y, int z)
     {
         if (x < 0 || x >= SizeX ||
