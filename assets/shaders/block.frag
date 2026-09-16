@@ -2,6 +2,7 @@
 
 in vec2 vTexCoord;
 in vec3 vNormal;
+in float vAO;
 
 uniform sampler2D uTexture;
 uniform vec3 uLightDirection;
@@ -13,11 +14,31 @@ void main()
     vec3 normal = normalize(vNormal);
     vec3 lightDir = normalize(uLightDirection);
     
-    float ambient = 0.4;
-    float diffuse = max(dot(normal, lightDir), 0.0);
+    float ambient = 0.45;
+    float diffuse = dot(normal, lightDir) * 0.5 + 0.5;
+
+    float faceLight;
+
+    if (normal.y > 0.5) // Top
+    {
+        faceLight = 1.0;
+    }
+    else if (normal.y < -0.5) // Bottom
+    {
+        faceLight = 0.6;
+    }
+    else // Sides
+    {
+        faceLight = 0.8;
+    }
     
-    float brightness = ambient + (1.0 - ambient) * diffuse;
+    float lighting = ambient + (1.0 - ambient) * diffuse;
+    lighting *= faceLight * vAO;
+    
     vec4 texColor = texture(uTexture, vTexCoord);
     
-    out_color = vec4(texColor.rgb * brightness, texColor.a);
+    // Debugging output:
+//    out_color = vec4(vec3(1, 1, 1) * lighting, 1.0);
+    
+    out_color = vec4(texColor.rgb * lighting, texColor.a);
 }

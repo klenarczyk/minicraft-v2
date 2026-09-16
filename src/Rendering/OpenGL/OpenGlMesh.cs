@@ -89,6 +89,20 @@ public sealed class OpenGlMesh : IDisposable
             (uint)sizeof(MeshVertex),
             (void*)(6 * sizeof(float)));
         
+        // Ambient occlusion
+        // Texture coords
+        const uint aoLocation = 3;
+
+        gl.EnableVertexAttribArray(aoLocation);
+
+        gl.VertexAttribPointer(
+            aoLocation,
+            1,
+            VertexAttribPointerType.UnsignedByte,
+            false,
+            (uint)sizeof(MeshVertex),
+            (void*)(8 * sizeof(float)));
+        
         // ---
         
         gl.BindVertexArray(0);

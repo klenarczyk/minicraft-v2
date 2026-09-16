@@ -6,7 +6,7 @@ namespace Minicraft.Engine.World.Chunks;
 
 public sealed class ChunkStreamer(ChunkStorage chunks)
 {
-    public int LoadDistance { get; set; } = 5;
+    public int LoadDistance { get; set; } = 4;
     
     public void Update(Vector3 playerPosition)
     {
