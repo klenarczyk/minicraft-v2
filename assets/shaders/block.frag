@@ -4,8 +4,14 @@ in vec2 vTexCoord;
 in vec3 vNormal;
 in float vAO;
 
+in float vDistance;
+
 uniform sampler2D uTexture;
 uniform vec3 uLightDirection;
+
+uniform vec3 uFogColor;
+uniform float uFogStart;
+uniform float uFogEnd;
                                       
 out vec4 out_color;
 
@@ -37,8 +43,11 @@ void main()
     
     vec4 texColor = texture(uTexture, vTexCoord);
 
-    out_color = vec4(texColor.rgb * lighting, texColor.a);
+    vec3 color = texColor.rgb * lighting;
     
-    // Debug Output:
-//    out_color = vec4(vec3(1, 1, 1) * lighting, 1.0);
+    float fogFactor = smoothstep(uFogStart, uFogEnd, vDistance);
+    
+    color = mix(color, uFogColor, fogFactor);
+    
+    out_color = vec4(color, texColor.a);
 }

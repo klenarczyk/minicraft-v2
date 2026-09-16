@@ -88,6 +88,12 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
         _blockShader.SetMatrix4("uView", camera.CreateViewMatrix());
         _blockShader.SetMatrix4("uProjection", camera.CreateProjectionMatrix());
         
+        _blockShader.SetVector3("uCameraPosition", camera.Position);
+        
+        _blockShader.SetVector3("uFogColor", SkyHorizonColor);
+        _blockShader.SetFloat("uFogStart", 48.0f); // TODO: Make render distance dependent
+        _blockShader.SetFloat("uFogEnd", 60.8f);
+        
         var renderedPositions = new HashSet<ChunkPosition>();
         
         foreach (var chunk in chunks)
