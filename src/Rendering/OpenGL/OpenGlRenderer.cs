@@ -10,16 +10,26 @@ namespace Minicraft.Rendering.OpenGL;
 public sealed class OpenGlRenderer(GL gl) : IRenderer
 {
     private OpenGlShader? _blockShader;
+    private OpenGlShader? _skyShader;
+    
     private OpenGlTexture? _dirtTexture;
     
     private readonly Dictionary<ChunkPosition, ChunkMeshEntry> _chunkEntries = new();
+
+    private uint _skyVao;
+    
+    private static readonly Vector3 SkyHorizonColor = new(0.65f, 0.80f, 1.0f);
+    private static readonly Vector3 SkyZenithColor = new(0.15f, 0.35f, 0.75f);
     
     public void Initialize()
     {
         _blockShader = CreateBlockShader();
+        _skyShader = CreateSkyShader();
 
         _dirtTexture = new OpenGlTexture(gl,
             Path.Combine(AppContext.BaseDirectory, "assets", "textures", "blocks", "dirt.png"));
+
+        _skyVao = gl.GenVertexArray();
         
         gl.Enable(EnableCap.DepthTest);
         
@@ -32,11 +42,42 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
 
     public void Render(Camera camera, IEnumerable<ChunkRenderData> chunks, double deltaTime)
     {
-        if (_blockShader is null || _dirtTexture is null)
+        if (_blockShader is null || _skyShader is null || _dirtTexture is null)
             throw new InvalidOperationException("Renderer has not been initialized.");
         
-        gl.ClearColor(0.529f, 0.808f, 0.922f, 1.0f);
+        gl.ClearColor(0, 0, 0, 1);
         gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        
+        // --- Sky ---
+        
+        _skyShader.Use();
+        
+        var view = camera.CreateViewMatrix();
+        var projection = camera.CreateProjectionMatrix();
+        
+        var inverseView = Matrix4x4.Invert(view, out var invView)
+            ? invView
+            :throw new InvalidOperationException("Could not invert view matrix.");
+        
+        var inverseProjection = Matrix4x4.Invert(projection, out var invProjection)
+            ? invProjection
+            : throw new InvalidOperationException("Could not invert projection matrix.");
+        
+        _skyShader.SetMatrix4("uInvView", inverseView);
+        _skyShader.SetMatrix4("uInvProjection", inverseProjection);
+        
+        _skyShader.SetVector3("uHorizonColor", SkyHorizonColor);
+        _skyShader.SetVector3("uZenithColor", SkyZenithColor);
+        
+        gl.Disable(EnableCap.DepthTest);
+        gl.BindVertexArray(_skyVao);
+        
+        gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
+        
+        gl.BindVertexArray(0);
+        gl.Enable(EnableCap.DepthTest);
+        
+        // --- Blocks ---
         
         _blockShader.Use();
         _dirtTexture.Bind();
@@ -95,6 +136,16 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
 
         string vertexSource = File.ReadAllText(Path.Combine(shaderDirectory, "block.vert"));
         string fragmentSource = File.ReadAllText(Path.Combine(shaderDirectory, "block.frag"));
+        
+        return new OpenGlShader(gl, vertexSource, fragmentSource);
+    }
+
+    private OpenGlShader CreateSkyShader()
+    {
+        string shaderDirectory = Path.Combine(AppContext.BaseDirectory, "assets", "shaders");
+        
+        string vertexSource = File.ReadAllText(Path.Combine(shaderDirectory, "sky.vert"));
+        string fragmentSource = File.ReadAllText(Path.Combine(shaderDirectory, "sky.frag"));
         
         return new OpenGlShader(gl, vertexSource, fragmentSource);
     }

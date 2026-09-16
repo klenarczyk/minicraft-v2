@@ -45,6 +45,8 @@ public sealed class ClientApplication
             _renderer?.Resize(size.X, size.Y);
             _engine.Player.Camera.Resize(size.X, size.Y);
         };
+        
+        // _window.WindowState = WindowState.Fullscreen;
     }
 
     public void Run() => _window.Run();

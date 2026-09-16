@@ -36,9 +36,9 @@ void main()
     lighting *= faceLight * vAO;
     
     vec4 texColor = texture(uTexture, vTexCoord);
-    
-    // Debugging output:
-//    out_color = vec4(vec3(1, 1, 1) * lighting, 1.0);
-    
+
     out_color = vec4(texColor.rgb * lighting, texColor.a);
+    
+    // Debug Output:
+//    out_color = vec4(vec3(1, 1, 1) * lighting, 1.0);
 }
