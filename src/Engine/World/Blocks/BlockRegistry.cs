@@ -2,8 +2,13 @@
 
 public sealed class BlockRegistry
 {
-    private readonly Dictionary<BlockId, BlockDefinition> _blocks = new();
+    private readonly Dictionary<BlockId, BlockDefinition> _blocks = new()
+    {
+        { BlockId.Air, new BlockDefinition(BlockId.Air, "air", false) }
+    };
 
+    public int Count => _blocks.Count;
+    
     public void Register(BlockDefinition block)
     {
         if (!_blocks.TryAdd(block.Id, block))

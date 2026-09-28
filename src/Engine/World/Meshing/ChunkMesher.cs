@@ -6,7 +6,7 @@ namespace Minicraft.Engine.World.Meshing;
 
 public sealed class ChunkMesher(BlockRegistry blocks)
 {
-    public MeshData Build(World world, Chunk chunk)
+    public MeshData Build(ChunkMeshInput input)
     {
         var vertices = new List<MeshVertex>();
         var indices = new List<uint>();
@@ -15,31 +15,26 @@ public sealed class ChunkMesher(BlockRegistry blocks)
         for (var z = 0; z < Chunk.SizeZ; z++)
         for (var x = 0; x < Chunk.SizeX; x++)
         {
-            var blockId = chunk.GetBlock(x, y, z);
-            var block = blocks.Get(blockId);
-
-            if (!block.IsSolid) continue;
-
-            int worldX = chunk.Position.X * Chunk.SizeX + x;
-            int worldZ = chunk.Position.Z * Chunk.SizeZ + z;
+            var blockId = input.GetBlock(x, y, z);
+            if (!blocks.Get(blockId).IsSolid) continue;
             
-            if (IsAir(world, worldX - 1, y, worldZ))
-                AddFace(vertices, indices, world, x, y, z, worldX, worldZ, Direction.West);
+            if (IsAir(input, x - 1, y, z))
+                AddFace(vertices, indices, input, x, y, z, Direction.West);
 
-            if (IsAir(world, worldX + 1, y, worldZ))
-                AddFace(vertices, indices, world, x, y, z, worldX, worldZ, Direction.East);
+            if (IsAir(input, x + 1, y, z))
+                AddFace(vertices, indices, input, x, y, z, Direction.East);
 
-            if (IsAir(world, worldX, y - 1, worldZ))
-                AddFace(vertices, indices, world, x, y, z, worldX, worldZ, Direction.Down);
+            if (IsAir(input, x, y - 1, z))
+                AddFace(vertices, indices, input, x, y, z, Direction.Down);
 
-            if (IsAir(world, worldX, y + 1, worldZ))
-                AddFace(vertices, indices, world, x, y, z, worldX, worldZ, Direction.Up);
+            if (IsAir(input, x, y + 1, z))
+                AddFace(vertices, indices, input, x, y, z, Direction.Up);
 
-            if (IsAir(world, worldX, y, worldZ - 1))
-                AddFace(vertices, indices, world, x, y, z, worldX, worldZ, Direction.North);
+            if (IsAir(input, x, y, z - 1))
+                AddFace(vertices, indices, input, x, y, z, Direction.North);
 
-            if (IsAir(world, worldX, y, worldZ + 1))
-                AddFace(vertices, indices, world, x, y, z, worldX, worldZ, Direction.South);
+            if (IsAir(input, x, y, z + 1))
+                AddFace(vertices, indices, input, x, y, z, Direction.South);
         }
 
         return new MeshData(vertices.ToArray(), indices.ToArray());
@@ -48,9 +43,8 @@ public sealed class ChunkMesher(BlockRegistry blocks)
     private void AddFace(
         List<MeshVertex> vertices,
         List<uint> indices,
-        World world,
+        ChunkMeshInput input,
         int x, int y, int z,
-        int wx, int wz,
         Direction direction)
     {
         var start = (uint)vertices.Count;
@@ -59,25 +53,25 @@ public sealed class ChunkMesher(BlockRegistry blocks)
         {
             case Direction.West:
             {
-                byte ao0 = CalculateAo(world,
-                    wx - 1, y - 1, wz,
-                    wx - 1, y, wz - 1,
-                    wx - 1, y - 1, wz - 1);
+                byte ao0 = CalculateAo(input,
+                    x - 1, y - 1, z,
+                    x - 1, y, z - 1,
+                    x - 1, y - 1, z - 1);
 
-                byte ao1 = CalculateAo(world,
-                    wx - 1, y - 1, wz,
-                    wx - 1, y, wz + 1,
-                    wx - 1, y - 1, wz + 1);
+                byte ao1 = CalculateAo(input,
+                    x - 1, y - 1, z,
+                    x - 1, y, z + 1,
+                    x - 1, y - 1, z + 1);
 
-                byte ao2 = CalculateAo(world,
-                    wx - 1, y + 1, wz,
-                    wx - 1, y, wz + 1,
-                    wx - 1, y + 1, wz + 1);
+                byte ao2 = CalculateAo(input,
+                    x - 1, y + 1, z,
+                    x - 1, y, z + 1,
+                    x - 1, y + 1, z + 1);
 
-                byte ao3 = CalculateAo(world,
-                    wx - 1, y + 1, wz,
-                    wx - 1, y, wz - 1,
-                    wx - 1, y + 1, wz - 1);
+                byte ao3 = CalculateAo(input,
+                    x - 1, y + 1, z,
+                    x - 1, y, z - 1,
+                    x - 1, y + 1, z - 1);
                 
                 AddVertex(vertices, x, y, z, -1, 0, 0, 0, 0, ao0);
                 AddVertex(vertices, x, y, z + 1, -1, 0, 0, 1, 0, ao1);
@@ -90,25 +84,25 @@ public sealed class ChunkMesher(BlockRegistry blocks)
 
             case Direction.East:
             {
-                byte ao0 = CalculateAo(world,
-                    wx + 1, y - 1, wz,
-                    wx + 1, y, wz - 1,
-                    wx + 1, y - 1, wz - 1);
+                byte ao0 = CalculateAo(input,
+                    x + 1, y - 1, z,
+                    x + 1, y, z - 1,
+                    x + 1, y - 1, z - 1);
 
-                byte ao1 = CalculateAo(world,
-                    wx + 1, y + 1, wz,
-                    wx + 1, y, wz - 1,
-                    wx + 1, y + 1, wz - 1);
+                byte ao1 = CalculateAo(input,
+                    x + 1, y + 1, z,
+                    x + 1, y, z - 1,
+                    x + 1, y + 1, z - 1);
 
-                byte ao2 = CalculateAo(world,
-                    wx + 1, y + 1, wz,
-                    wx + 1, y, wz + 1,
-                    wx + 1, y + 1, wz + 1);
+                byte ao2 = CalculateAo(input,
+                    x + 1, y + 1, z,
+                    x + 1, y, z + 1,
+                    x + 1, y + 1, z + 1);
 
-                byte ao3 = CalculateAo(world,
-                    wx + 1, y - 1, wz,
-                    wx + 1, y, wz + 1,
-                    wx + 1, y - 1, wz + 1);
+                byte ao3 = CalculateAo(input,
+                    x + 1, y - 1, z,
+                    x + 1, y, z + 1,
+                    x + 1, y - 1, z + 1);
                 
                 AddVertex(vertices, x + 1, y, z, 1, 0, 0, 0, 0, ao0);
                 AddVertex(vertices, x + 1, y + 1, z, 1, 0, 0, 0, 1, ao1);
@@ -121,25 +115,25 @@ public sealed class ChunkMesher(BlockRegistry blocks)
 
             case Direction.Down:
             {
-                byte ao0 = CalculateAo(world,
-                    wx - 1, y - 1, wz,
-                    wx, y - 1, wz - 1,
-                    wx - 1, y - 1, wz - 1);
+                byte ao0 = CalculateAo(input,
+                    x - 1, y - 1, z,
+                    x, y - 1, z - 1,
+                    x - 1, y - 1, z - 1);
 
-                byte ao1 = CalculateAo(world,
-                    wx + 1, y - 1, wz,
-                    wx, y - 1, wz - 1,
-                    wx + 1, y - 1, wz - 1);
+                byte ao1 = CalculateAo(input,
+                    x + 1, y - 1, z,
+                    x, y - 1, z - 1,
+                    x + 1, y - 1, z - 1);
 
-                byte ao2 = CalculateAo(world,
-                    wx + 1, y - 1, wz,
-                    wx, y - 1, wz + 1,
-                    wx + 1, y - 1, wz + 1);
+                byte ao2 = CalculateAo(input,
+                    x + 1, y - 1, z,
+                    x, y - 1, z + 1,
+                    x + 1, y - 1, z + 1);
 
-                byte ao3 = CalculateAo(world,
-                    wx - 1, y - 1, wz,
-                    wx, y - 1, wz + 1,
-                    wx - 1, y - 1, wz + 1);
+                byte ao3 = CalculateAo(input,
+                    x - 1, y - 1, z,
+                    x, y - 1, z + 1,
+                    x - 1, y - 1, z + 1);
                 
                 AddVertex(vertices, x, y, z, 0, -1, 0, 0, 0, ao0);
                 AddVertex(vertices, x + 1, y, z, 0, -1, 0, 1, 0, ao1);
@@ -152,25 +146,25 @@ public sealed class ChunkMesher(BlockRegistry blocks)
 
             case Direction.Up:
             {
-                byte ao0 = CalculateAo(world,
-                    wx - 1, y + 1, wz,
-                    wx,     y + 1, wz - 1,
-                    wx - 1, y + 1, wz - 1);
+                byte ao0 = CalculateAo(input,
+                    x - 1, y + 1, z,
+                    x, y + 1, z - 1,
+                    x - 1, y + 1, z - 1);
                 
-                byte ao1 = CalculateAo(world,
-                    wx - 1, y + 1, wz,
-                    wx,     y + 1, wz + 1,
-                    wx - 1, y + 1, wz + 1);
+                byte ao1 = CalculateAo(input,
+                    x - 1, y + 1, z,
+                    x, y + 1, z + 1,
+                    x - 1, y + 1, z + 1);
 
-                byte ao2 = CalculateAo(world,
-                    wx + 1, y + 1, wz,
-                    wx,     y + 1, wz + 1,
-                    wx + 1, y + 1, wz + 1);
+                byte ao2 = CalculateAo(input,
+                    x + 1, y + 1, z,
+                    x, y + 1, z + 1,
+                    x + 1, y + 1, z + 1);
                 
-                byte ao3 = CalculateAo(world,
-                    wx + 1, y + 1, wz,
-                    wx,     y + 1, wz - 1,
-                    wx + 1, y + 1, wz - 1);
+                byte ao3 = CalculateAo(input,
+                    x + 1, y + 1, z,
+                    x, y + 1, z - 1,
+                    x + 1, y + 1, z - 1);
                 
                 AddVertex(vertices, x, y + 1, z, 0, 1, 0, 0, 0, ao0);
                 AddVertex(vertices, x, y + 1, z + 1, 0, 1, 0, 0, 1, ao1);
@@ -183,25 +177,25 @@ public sealed class ChunkMesher(BlockRegistry blocks)
 
             case Direction.North:
             {
-                byte ao0 = CalculateAo(world,
-                    wx - 1, y, wz - 1,
-                    wx, y - 1, wz - 1,
-                    wx - 1, y - 1, wz - 1);
+                byte ao0 = CalculateAo(input,
+                    x - 1, y, z - 1,
+                    x, y - 1, z - 1,
+                    x - 1, y - 1, z - 1);
 
-                byte ao1 = CalculateAo(world,
-                    wx - 1, y, wz - 1,
-                    wx, y + 1, wz - 1,
-                    wx - 1, y + 1, wz - 1);
+                byte ao1 = CalculateAo(input,
+                    x - 1, y, z - 1,
+                    x, y + 1, z - 1,
+                    x - 1, y + 1, z - 1);
 
-                byte ao2 = CalculateAo(world,
-                    wx + 1, y, wz - 1,
-                    wx, y + 1, wz - 1,
-                    wx + 1, y + 1, wz - 1);
+                byte ao2 = CalculateAo(input,
+                    x + 1, y, z - 1,
+                    x, y + 1, z - 1,
+                    x + 1, y + 1, z - 1);
 
-                byte ao3 = CalculateAo(world,
-                    wx + 1, y, wz - 1,
-                    wx, y - 1, wz - 1,
-                    wx + 1, y - 1, wz - 1);
+                byte ao3 = CalculateAo(input,
+                    x + 1, y, z - 1,
+                    x, y - 1, z - 1,
+                    x + 1, y - 1, z - 1);
                 
                 AddVertex(vertices, x, y, z, 0, 0, -1, 0, 0, ao0);
                 AddVertex(vertices, x, y + 1, z, 0, 0, -1, 0, 1, ao1);
@@ -214,25 +208,25 @@ public sealed class ChunkMesher(BlockRegistry blocks)
 
             case Direction.South:
             {
-                byte ao0 = CalculateAo(world,
-                    wx + 1, y, wz + 1,
-                    wx, y - 1, wz + 1,
-                    wx + 1, y - 1, wz + 1);
+                byte ao0 = CalculateAo(input,
+                    x + 1, y, z + 1,
+                    x, y - 1, z + 1,
+                    x + 1, y - 1, z + 1);
 
-                byte ao1 = CalculateAo(world,
-                    wx + 1, y, wz + 1,
-                    wx, y + 1, wz + 1,
-                    wx + 1, y + 1, wz + 1);
+                byte ao1 = CalculateAo(input,
+                    x + 1, y, z + 1,
+                    x, y + 1, z + 1,
+                    x + 1, y + 1, z + 1);
 
-                byte ao2 = CalculateAo(world,
-                    wx - 1, y, wz + 1,
-                    wx, y + 1, wz + 1,
-                    wx - 1, y + 1, wz + 1);
+                byte ao2 = CalculateAo(input,
+                    x - 1, y, z + 1,
+                    x, y + 1, z + 1,
+                    x - 1, y + 1, z + 1);
 
-                byte ao3 = CalculateAo(world,
-                    wx - 1, y, wz + 1,
-                    wx, y - 1, wz + 1,
-                    wx - 1, y - 1, wz + 1);
+                byte ao3 = CalculateAo(input,
+                    x - 1, y, z + 1,
+                    x, y - 1, z + 1,
+                    x - 1, y - 1, z + 1);
                 
                 AddVertex(vertices, x + 1, y, z + 1, 0, 0, 1, 0, 0, ao0);
                 AddVertex(vertices, x + 1, y + 1, z + 1, 0, 0, 1, 0, 1, ao1);
@@ -277,28 +271,28 @@ public sealed class ChunkMesher(BlockRegistry blocks)
         indices.Add(start + 3);
     }
 
-    private byte CalculateAo(World world,
+    private byte CalculateAo(ChunkMeshInput input,
         int side1X, int side1Y, int side1Z,
         int side2X, int side2Y, int side2Z,
         int cornerX, int cornerY, int cornerZ)
     {
-        bool side1 = IsSolid(world, side1X, side1Y, side1Z);
-        bool side2 = IsSolid(world, side2X, side2Y, side2Z);
-        bool corner = IsSolid(world, cornerX, cornerY, cornerZ);
+        bool side1 = IsSolid(input, side1X, side1Y, side1Z);
+        bool side2 = IsSolid(input, side2X, side2Y, side2Z);
+        bool corner = IsSolid(input, cornerX, cornerY, cornerZ);
 
         if (side1 && side2) return 0;
-        
-        return (byte)(3
-                - (side1 ? 1 : 0)
-                - (side2 ? 1 : 0)
-                - (corner ? 1 : 0));
+
+        var occlusion = 3;
+        if (side1) occlusion--;
+        if (side2) occlusion--;
+        if (corner) occlusion--;
+
+        return (byte)occlusion;
     }
     
-    private bool IsSolid(World world, int x, int y, int z)
-    {
-        return blocks.Get(world.GetBlock(x, y, z)).IsSolid;
-    }
+    private bool IsSolid(ChunkMeshInput input, int x, int y, int z)
+        => blocks.Get(input.GetBlock(x, y, z)).IsSolid;
 
-    private bool IsAir(World world, int x, int y, int z)
-        => !IsSolid(world, x, y, z);
+    private bool IsAir(ChunkMeshInput input, int x, int y, int z)
+        => !IsSolid(input, x, y, z);
 }

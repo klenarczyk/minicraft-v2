@@ -5,8 +5,10 @@ namespace Minicraft.Engine.World.Generation;
 
 public static class RippleWorldGenerator
 {
-    public static void Generate(Chunk chunk, BlockId block)
+    public static BlockId[] Generate(ChunkPosition position, BlockId block)
     {
+        var blocks = new BlockId[Chunk.SizeX * Chunk.SizeY * Chunk.SizeZ];
+        
         const int amplitude = 5;
         const double frequency = 0.1;
         const int baseline = 10;
@@ -14,8 +16,8 @@ public static class RippleWorldGenerator
         for (var z = 0; z < Chunk.SizeZ; z++)
         for (var x = 0; x < Chunk.SizeX; x++)
         {
-            int worldX = chunk.Position.X * Chunk.SizeX + x;
-            int worldZ = chunk.Position.Z * Chunk.SizeZ + z;
+            int worldX = position.X * Chunk.SizeX + x;
+            int worldZ = position.Z * Chunk.SizeZ + z;
 
             double distance = Math.Sqrt(worldX * worldX + worldZ * worldZ);
             
@@ -23,8 +25,10 @@ public static class RippleWorldGenerator
 
             for (var y = 0; y < height; y++)
             {
-                chunk.SetBlock(x, y, z, block);
+                blocks[Chunk.GetBlockIndex(x, y, z)] = block;
             }
         }
+
+        return blocks;
     }
 }

@@ -15,7 +15,7 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
     private OpenGlTexture? _dirtTexture;
     
     private readonly Dictionary<ChunkPosition, ChunkMeshEntry> _chunkEntries = new();
-
+    
     private uint _skyVao;
     
     private static readonly Vector3 SkyHorizonColor = new(0.65f, 0.80f, 1.0f);
@@ -48,12 +48,12 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
         gl.ClearColor(0, 0, 0, 1);
         gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         
+        var view = camera.CreateViewMatrix();
+        var projection = camera.CreateProjectionMatrix();
+        
         // --- Sky ---
         
         _skyShader.Use();
-        
-        var view = camera.CreateViewMatrix();
-        var projection = camera.CreateProjectionMatrix();
         
         var inverseView = Matrix4x4.Invert(view, out var invView)
             ? invView
@@ -85,14 +85,14 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
         _blockShader.SetInt("uTexture", 0);
         _blockShader.SetVector3("uLightDirection", new Vector3(0.5f, 1.0f, 0.3f)); // TODO: Turn into an actual sun
         
-        _blockShader.SetMatrix4("uView", camera.CreateViewMatrix());
-        _blockShader.SetMatrix4("uProjection", camera.CreateProjectionMatrix());
+        _blockShader.SetMatrix4("uView", view);
+        _blockShader.SetMatrix4("uProjection", projection);
         
         _blockShader.SetVector3("uCameraPosition", camera.Position);
         
         _blockShader.SetVector3("uFogColor", SkyHorizonColor);
-        _blockShader.SetFloat("uFogStart", 48.0f); // TODO: Make render distance dependent
-        _blockShader.SetFloat("uFogEnd", 60.8f);
+        _blockShader.SetFloat("uFogStart", 144.0f); // TODO: Make render distance dependent
+        _blockShader.SetFloat("uFogEnd", 182.4f);
         
         var renderedPositions = new HashSet<ChunkPosition>();
         

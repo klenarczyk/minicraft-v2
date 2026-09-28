@@ -90,7 +90,6 @@ public sealed class OpenGlMesh : IDisposable
             (void*)(6 * sizeof(float)));
         
         // Ambient occlusion
-        // Texture coords
         const uint aoLocation = 3;
 
         gl.EnableVertexAttribArray(aoLocation);
