@@ -91,8 +91,8 @@ public sealed class OpenGlRenderer(GL gl) : IRenderer
         _blockShader.SetVector3("uCameraPosition", camera.Position);
         
         _blockShader.SetVector3("uFogColor", SkyHorizonColor);
-        _blockShader.SetFloat("uFogStart", 144.0f); // TODO: Make render distance dependent
-        _blockShader.SetFloat("uFogEnd", 182.4f);
+        _blockShader.SetFloat("uFogStart", 102.4f); // TODO: Make render distance dependent
+        _blockShader.SetFloat("uFogEnd", 121.6f);
         
         var renderedPositions = new HashSet<ChunkPosition>();
         

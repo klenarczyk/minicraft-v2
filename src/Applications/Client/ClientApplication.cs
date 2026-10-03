@@ -82,8 +82,7 @@ public sealed class ClientApplication
             throw new InvalidOperationException("Renderer has not been initialized.");
 
         var chunks = ChunkRenderDataConverter
-            .Convert(_engine.World.Chunks.LoadedChunks)
-            .ToArray();
+            .Convert(_engine.World.Chunks.LoadedChunks);
         
         _renderer.Render(_engine.Player.Camera, chunks, deltaTime);
     }

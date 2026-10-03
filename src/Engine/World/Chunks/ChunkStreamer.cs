@@ -4,7 +4,7 @@ namespace Minicraft.Engine.World.Chunks;
 
 public sealed class ChunkStreamer
 {
-    public int LoadDistance { get; set; } = 12;
+    public int LoadDistance { get; set; } = 8;
 
     private readonly HashSet<ChunkPosition> _desiredChunks = [];
     public IReadOnlySet<ChunkPosition> DesiredChunks => _desiredChunks;
